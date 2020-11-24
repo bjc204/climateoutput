@@ -1,0 +1,23 @@
+import xarray as xr
+import matplotlib.pyplot as plt
+%matplotlib
+import cartopy.crs as ccrs
+import numpy as np
+filedir = '/glade/p/univ/urtg0006/OVERSHOOT/Brendan/files/climate/'
+filename1 = 'b.e21.BWSSP585cmip6.f09_g17.CMIP6-SSP5-8.5-WACCM.001.clm2.h0.RAIN.201501-210012.nc'
+filename2 = 'b.e21.BWSSP585cmip6.f09_g17.CMIP6-SSP5-8.5-WACCM.feedback.15C.001.clm2.h0.RAIN.201901-210012.nc'
+filepath1 = filedir + filename1
+filepath2 = filedir + filename2
+ds1     = xr.open_dataset(filepath1)
+ds2     = xr.open_dataset(filepath2)
+rain1 = ds1['RAIN']
+rain2 = ds2['RAIN']
+rain85 = rain1 * 31536000
+raingeo = rain2 * 31536000
+rain_85 = rain85.mean(dim='time', skipna=True, keep_attrs=True)
+rain_geo = raingeo.mean(dim='time', skipna=True, keep_attrs=True)
+rain = rain_85 - rain_geo
+ax = plt.axes(projection=ccrs.PlateCarree())
+ax.set_global()
+rain.plot.contourf(ax=ax, transform=ccrs.PlateCarree(), cbar_kwargs={'orientation': 'horizontal'})
+ax.coastlines()

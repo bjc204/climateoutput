@@ -1,0 +1,24 @@
+import xarray as xr
+import matplotlib.pyplot as plt
+%matplotlib
+import cartopy.crs as ccrs
+import numpy as np
+import matplotlib.colors as colors
+import pandas as pd
+filedir = '/glade/p/univ/urtg0006/OVERSHOOT/Brendan/files/climate/'
+filename1 = 'b.e21.BWSSP585cmip6.f09_g17.CMIP6-SSP5-8.5-WACCM.001.clm2.h0.FSDS.201501-210012.nc'
+filename2 = 'b.e21.BWSSP585cmip6.f09_g17.CMIP6-SSP5-8.5-WACCM.feedback.15C.001.clm2.h0.FSDS.201901-210012.nc'
+filepath1 = filedir + filename1
+filepath2 = filedir + filename2
+ssp585 = xr.open_dataset(filepath1)
+geo585 = xr.open_dataset(filepath2)
+FSDS85 = ssp585['FSDS']
+FSDSgeo = geo585['FSDS']
+FSDS_85 = FSDS85.sel(time=slice('2090-01-01', '2101-01-01')).mean(dim='time', skipna=True, keep_attrs=True)
+FSDS_geo = FSDSgeo.sel(time=slice('2090-01-01', '2101-01-01')).mean(dim='time', skipna=True, keep_attrs=True)
+FSDS = FSDS_geo - FSDS_85
+norm = colors.TwoSlopeNorm(vmin=-45, vcenter=0, vmax=45)
+ax = plt.axes(projection=ccrs.PlateCarree())
+ax.set_global()
+FSDS.plot.contourf(ax=ax, levels = np.arange(-45, 45, 0.5), transform=ccrs.PlateCarree(), norm=norm, cbar_kwargs={'orientation': 'horizontal'})
+ax.coastlines()

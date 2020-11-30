@@ -1,0 +1,28 @@
+import xarray as xr
+import matplotlib.pyplot as plt
+%matplotlib
+import cartopy.crs as ccrs
+import numpy as np
+import matplotlib.colors as colors
+import pandas as pd
+filedir = '/glade/p/univ/urtg0006/OVERSHOOT/Brendan/files/climate/'
+filename1 = 'b.e21.BWSSP585cmip6.f09_g17.CMIP6-SSP5-8.5-WACCM.001.clm2.h0.RAIN.201501-210012.nc'
+filename2 = 'b.e21.BWSSP585cmip6.f09_g17.CMIP6-SSP5-8.5-WACCM.feedback.15C.001.clm2.h0.RAIN.201901-210012.nc'
+filepath1 = filedir + filename1
+filepath2 = filedir + filename2
+ssp585 = xr.open_dataset(filepath1)
+geo585 = xr.open_dataset(filepath2)
+RAIN85 = ssp585['RAIN']
+RAINgeo = geo585['RAIN']
+RAIN85 = RAIN85 * 86400
+RAINgeo = RAINgeo * 86400
+RAIN_85 = RAIN85.sel(time=slice('2090-01-01', '2101-01-01')).mean(dim='time', skipna=True, keep_attrs=True)
+RAIN_geo = RAINgeo.sel(time=slice('2090-01-01', '2101-01-01')).mean(dim='time', skipna=True, keep_attrs=True)
+RAIN = RAIN_geo - RAIN_85
+norm = colors.TwoSlopeNorm(vmin=-7.5, vcenter=0, vmax=3)
+ax = plt.axes(projection=ccrs.PlateCarree())
+ax.set_global()
+RAIN.plot.contourf(ax=ax, levels = np.arange(-7.5, 3, 0.1), transform=ccrs.PlateCarree(), norm=norm)
+ax.coastlines()
+ax.set_extent([70, 135, 0, 50])
+plt.title('Rain Difference (mm/day) SSP58.5 Geo 1.5 C minus SSP58.5 2090-2100')
